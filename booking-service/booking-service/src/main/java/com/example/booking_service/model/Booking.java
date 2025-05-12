@@ -1,0 +1,45 @@
+package com.example.booking_service.model;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Entity
+@Table(name = "bookings")
+@Getter
+@Setter
+public class Booking {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+
+    @Column(name = "owner_id", nullable = false)
+    private UUID ownerId;       // Del User Service
+
+    @Column(nullable = false)
+    private UUID walkerUserId;      // Del Walker Service
+
+    @Column(name = "dog_id", nullable = false)
+    private UUID dogId;         // Del Dog Service
+
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
+
+    @Column(name = "end_time", nullable = false)
+    private LocalDateTime endTime;
+
+    @Column(name = "meeting_point", nullable = false)
+    private String meetingPoint;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private BookingStatus status; // PENDING, ACCEPTED, IN_PROGRESS, COMPLETED, CANCELLED
+
+    @Column(name = "price", nullable = false)
+    private Double price;
+
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/dog-service/dog-service/pom.xml" />
+        <option value="$PROJECT_DIR$/chat-service/chat-service/pom.xml" />
+        <option value="$PROJECT_DIR$/user-service/user-service/pom.xml" />
+        <option value="$PROJECT_DIR$/walker-service/walker-service/pom.xml" />
+        <option value="$PROJECT_DIR$/booking-service/booking-service/pom.xml" />
+        <option value="$PROJECT_DIR$/payment-service/payment-service/pom.xml" />
+        <option value="$PROJECT_DIR$/notification-service/notification-service/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_23" default="true" project-jdk-name="openjdk-22" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>

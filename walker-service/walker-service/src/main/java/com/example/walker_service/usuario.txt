@@ -1,0 +1,41 @@
+{
+    "id": "60b75fa6-f5e3-40ae-b3c7-e6da059f3d29",
+    "userId": "4c631a30-02db-4303-8dfc-a72a248336d5",
+    "description": "Experienced dog walker with certifications in first aid and dog training.",
+    "hourlyRate": 15.0,
+    "certifications": [
+        "First Aid",
+        "Dog Trainer"
+    ],
+    "serviceAreas": [
+        "Neighborhood A",
+        "Neighborhood B"
+    ],
+    "location": {
+        "x": 40.7128,
+        "y": -74.006,
+        "type": "Point",
+        "coordinates": [
+            40.7128,
+            -74.006
+        ]
+    },
+    "availability": {
+        "Monday": [
+            "09:00:00",
+            "17:00:00"
+        ],
+        "Tuesday": [
+            "09:00:00",
+            "17:00:00"
+        ]
+    },
+    "reviews": [
+        {
+            "id": "5cdf1025-5a0e-4eab-96fa-080886b37f1f",
+            "comment": "Great service!",
+            "rating": 5,
+            "date": null
+        }
+    ]
+}
