@@ -17,8 +17,7 @@
 
 
 
-## Descripción
-Tu idea es excelente y tiene mucho potencial. Aquí hay un desglose de cómo podrías estructurar la aplicación, junto con sugerencias para mejorarla y nuevas funcionalidades que podrías agregar.
+ChatGPT Ideas: 
 
 ## 1. Funcionalidades principales (MVP)
 ### a. Paseadores de perros
@@ -105,4 +104,3 @@ Tu idea es excelente y tiene mucho potencial. Aquí hay un desglose de cómo pod
 - **Usa herramientas low-code**: Para el frontend si no tienes experiencia (ejemplo: FlutterFlow).
 - **Crea una API RESTful bien documentada**: Facilita integraciones futuras (Swagger/OpenAPI).
 
-¡Es un proyecto ambicioso pero muy viable!
