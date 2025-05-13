@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -18,13 +18,15 @@ public class Booking {
     private UUID id;
 
     @Column(name = "owner_id", nullable = false)
-    private UUID ownerId;       // Del User Service
+    private UUID ownerId; // From User Service
 
     @Column(nullable = false)
-    private UUID walkerUserId;      // Del Walker Service
+    private UUID walkerUserId; // From Walker Service
 
+    @ElementCollection
+    @CollectionTable(name = "booking_dogs", joinColumns = @JoinColumn(name = "booking_id"))
     @Column(name = "dog_id", nullable = false)
-    private UUID dogId;         // Del Dog Service
+    private List<UUID> dogIds; // From Dog Service
 
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
@@ -41,5 +43,4 @@ public class Booking {
 
     @Column(name = "price", nullable = false)
     private Double price;
-
 }

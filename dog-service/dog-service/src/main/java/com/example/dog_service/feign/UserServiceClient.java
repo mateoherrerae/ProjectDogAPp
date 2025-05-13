@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import java.util.UUID;
 @FeignClient(
         name = "user-service",
-        url = "${user-service.url}", // Usa guión, no punto
-        configuration = FeignConfig.class // Para manejar seguridad
+        url = "${user-service.url}",
+        configuration = FeignConfig.class // to handle security
 )
 public interface UserServiceClient {
 
