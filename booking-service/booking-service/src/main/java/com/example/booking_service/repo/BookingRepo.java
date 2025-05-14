@@ -9,5 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface BookingRepo extends JpaRepository<Booking, UUID> {
+
     boolean existsByWalkerUserIdAndOwnerId(UUID walkerUserId, UUID ownerId);
 }

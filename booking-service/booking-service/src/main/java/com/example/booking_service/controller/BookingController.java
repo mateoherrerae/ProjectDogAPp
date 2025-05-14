@@ -4,9 +4,13 @@ import com.example.booking_service.client.DogServiceClient;
 import com.example.booking_service.client.UserServiceClient;
 import com.example.booking_service.model.Booking;
 import com.example.booking_service.model.DogResponse;
+import com.example.booking_service.model.OpenBooking;
+import com.example.booking_service.model.OpenBookingRequest;
 import com.example.booking_service.service.BookingService;
 import org.springframework.http.ResponseEntity;
 import com.example.booking_service.client.WalkerClient;
+import com.example.booking_service.client.NotificationClient;
+import com.example.booking_service.model.NotificationRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -20,13 +24,17 @@ public class BookingController {
     private final UserServiceClient userServiceClient;
     private final WalkerClient walkerServiceClient;
     private final DogServiceClient dogServiceClient;
+    private final NotificationClient notificationClient;
 
 
-    public BookingController(BookingService bookingService, UserServiceClient userServiceClient, WalkerClient walkerServiceClient, DogServiceClient dogServiceClient) {
+    public BookingController(BookingService bookingService, UserServiceClient userServiceClient,
+                             WalkerClient walkerServiceClient, DogServiceClient dogServiceClient,
+                             NotificationClient notificationClient) {
         this.bookingService = bookingService;
         this.userServiceClient = userServiceClient;
         this.walkerServiceClient = walkerServiceClient;
         this.dogServiceClient = dogServiceClient;
+        this.notificationClient = notificationClient;
     }
 
 
@@ -72,6 +80,37 @@ public class BookingController {
         Booking createdBooking = bookingService.createBooking(walkerUserId, clientId, booking);
         return ResponseEntity.ok(createdBooking);
     }
+    // for owners that search for a faster way to book a dog walker,
+    // and the dog walker is the one that accepts the booking
+    @PostMapping("/open")
+    public ResponseEntity<OpenBooking> createOpenBooking(
+            @RequestHeader("Authorization") String token,
+            @RequestBody OpenBookingRequest request
+    ) {
+        // Validar la autenticación del usuario
+        String clientIdString = userServiceClient.getCurrentUserId(token);
+        UUID clientId = UUID.fromString(clientIdString);
+
+        // Crear la publicación de un horario abierto
+        OpenBooking openBooking = bookingService.createOpenBooking(clientId, request);
+
+        // Convertir OpenBooking a NotificationRequest
+        NotificationRequest notificationRequest = mapToNotificationRequest(openBooking);
+
+        // Notificar a los paseadores
+        notificationClient.notifyWalkers(notificationRequest);
+
+        return ResponseEntity.ok(openBooking);
+    }
+
+    private NotificationRequest mapToNotificationRequest(OpenBooking openBooking) {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setWalkerIds(openBooking.getWalkerIds());
+        notificationRequest.setMessage("New open booking available!");
+        notificationRequest.setBookingId(openBooking.getId().toString());
+        notificationRequest.setExpiresAt(openBooking.getExpiresAt());
+        return notificationRequest;
+    }
 
 
 
@@ -107,14 +146,6 @@ public class BookingController {
 //        return ResponseEntity.ok(exists);
 //    }
 
-    // endpoint tipo uber para crear una reserva ve quien esta mas cerca segun la ubicacion del cliente y ubicacion del paseador
-//    @PostMapping("/create-uber")
-//    public ResponseEntity<Booking> createUberBooking(
-//            @RequestParam("clientId") UUID clientId,
-//            @RequestBody Booking booking
-//    ) {
-//        Booking createdBooking = bookingService.createUberBooking(clientId, booking);
-//        return ResponseEntity.ok(createdBooking);
-//    }
+
 
 }

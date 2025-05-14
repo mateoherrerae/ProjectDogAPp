@@ -8,5 +8,6 @@ import org.springframework.cloud.openfeign.FeignClient;
         url = "${walker-service.url}", // Usa guión, no punto
         configuration = FeignConfig.class // Para manejar seguridad
 )
-public class WalkerServiceClient {
+public interface WalkerServiceClient {
+
 }
