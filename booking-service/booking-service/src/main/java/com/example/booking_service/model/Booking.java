@@ -20,8 +20,11 @@ public class Booking {
     @Column(name = "owner_id", nullable = false)
     private UUID ownerId; // From User Service
 
-    @Column(nullable = false)
+    @Column(name = "walker_user_id", nullable = false) // ← Agrega name="walker_id"
     private UUID walkerUserId; // From Walker Service
+
+    @Column(name = "walker_id", nullable = false)
+    private UUID walkerId;
 
     @ElementCollection
     @CollectionTable(name = "booking_dogs", joinColumns = @JoinColumn(name = "booking_id"))
@@ -43,4 +46,8 @@ public class Booking {
 
     @Column(name = "price", nullable = false)
     private Double price;
+    // initialize status to PENDING
+    public Booking() {
+        this.status = BookingStatus.PENDING; // Inicialización explícita
+    }
 }

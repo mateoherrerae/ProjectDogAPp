@@ -35,6 +35,7 @@ public class SecurityWalker {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/walkers/nearby").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/walkers/exists/*").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/walkers/register").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/walkers/").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/walkers/*").authenticated()

@@ -19,14 +19,12 @@ public interface WalkerRepository extends MongoRepository<Walker, String> {
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     GeoJsonPoint location = null;
 
-    boolean existsByUserId(UUID userId);
+    boolean existsByUserId(String userId);
 
     Optional<com.example.walker_service.model.Walker> findByUserId(UUID userId);
 
     List<com.example.walker_service.model.Walker> findAllByUserId(String userId);
 
 
-    // Índice compuesto: serviceAreas + hourlyRate
-    @CompoundIndex(def = "{'serviceAreas': 1, 'hourlyRate': 1}")
-    class Walker { /* ... */ }
+
 }

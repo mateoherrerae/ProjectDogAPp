@@ -50,14 +50,15 @@ public class BookingController {
         String clientIdString = userServiceClient.getCurrentUserId(token);
         UUID clientId = UUID.fromString(clientIdString);
 
-        // Ensure the booking owner matches the authenticated user
         if (!clientId.equals(booking.getOwnerId())) {
+            // Return forbidden if clientId does not match booking.ownerId
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
-        // Validate walker profile
-        ResponseEntity<Boolean> walkerExistsResponse = walkerServiceClient.checkWalkerProfileExists(walkerUserId);
-        if (!walkerExistsResponse.getBody()) {
+        // Validate walker
+        ResponseEntity<Boolean> walkerExistsResponse = walkerServiceClient.checkWalkerProfileExists(token, walkerUserId);
+        if (walkerExistsResponse.getStatusCode() != HttpStatus.OK || !walkerExistsResponse.getBody()) {
+            // Return bad request if walker is invalid
             return ResponseEntity.badRequest().body(null);
         }
 
@@ -65,21 +66,37 @@ public class BookingController {
         List<UUID> dogIds = booking.getDogIds();
         ResponseEntity<List<DogResponse>> dogsResponse = dogServiceClient.getDogsByOwner(token);
         if (!dogsResponse.getStatusCode().is2xxSuccessful()) {
+            // Return bad request if DogService does not respond successfully
             return ResponseEntity.badRequest().body(null);
         }
 
         List<UUID> ownedDogIds = dogsResponse.getBody().stream()
                 .map(DogResponse::getId)
                 .toList();
-
         if (!ownedDogIds.containsAll(dogIds)) {
+            // Return bad request if dogs do not belong to the client
             return ResponseEntity.badRequest().body(null);
         }
 
+        // Validate meetingPoint
+        if (booking.getMeetingPoint() == null || booking.getMeetingPoint().isEmpty()) {
+            // Return bad request if meetingPoint is missing
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        // Set walkerId and walkerUserId in the booking object
+        booking.setWalkerId(walkerUserId);
+        booking.setWalkerUserId(walkerUserId);
+
         // Create booking
-        Booking createdBooking = bookingService.createBooking(walkerUserId, clientId, booking);
+        Booking createdBooking = bookingService.createBooking(token, walkerUserId, clientId, booking);
         return ResponseEntity.ok(createdBooking);
     }
+
+
+
+
+
     // for owners that search for a faster way to book a dog walker,
     // and the dog walker is the one that accepts the booking
     @PostMapping("/open")

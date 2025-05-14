@@ -19,7 +19,7 @@ public interface UserServiceClient {
     @GetMapping("/api/users/{userId}/username")
     ResponseEntity<String> getUsernameById(@PathVariable("userId") UUID userId);
 
-    @GetMapping("/me")
+    @GetMapping("/api/users/me")
     String getCurrentUserId(@RequestHeader("Authorization") String token);
 
     @PostMapping("/api/users/request-walker")

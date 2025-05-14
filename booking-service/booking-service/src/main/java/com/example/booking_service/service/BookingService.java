@@ -3,16 +3,13 @@ package com.example.booking_service.service;
 import com.example.booking_service.client.UserServiceClient;
 import com.example.booking_service.client.WalkerClient;
 import com.example.booking_service.client.NotificationClient;
-import com.example.booking_service.model.Booking;
-import com.example.booking_service.model.OpenBooking;
-import com.example.booking_service.model.OpenBookingRequest;
-import com.example.booking_service.model.Walker;
+import com.example.booking_service.model.*;
 import com.example.booking_service.repo.BookingRepo;
 import com.example.booking_service.repo.OpenBookingRepo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.example.booking_service.model.NotificationRequest;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.ArrayList;
@@ -38,22 +35,25 @@ public class BookingService {
         this.notificationClient = notificationClient;
     }
 
-    public Booking createBooking(UUID walkerUserId, UUID clientId, Booking booking) {
-        // Validar paseador
-        ResponseEntity<Boolean> walkerValidationResponse = walkerClient.checkWalkerProfileExists(walkerUserId);
+    public Booking createBooking(String token, UUID walkerUserId, UUID clientId, Booking booking) {
+        // Validate walker
+        ResponseEntity<Boolean> walkerValidationResponse = walkerClient.checkWalkerProfileExists(token, walkerUserId);
         if (walkerValidationResponse.getStatusCode() != HttpStatus.OK || !walkerValidationResponse.getBody()) {
-            throw new IllegalArgumentException("Walker no válido o no verificado");
+            throw new IllegalArgumentException("Walker not valid or not verified");
         }
 
-        // Validar cliente
+        // Validate client
         ResponseEntity<String> clientValidationResponse = userServiceClient.getUsernameById(clientId);
         if (clientValidationResponse.getStatusCode() != HttpStatus.OK || clientValidationResponse.getBody() == null) {
-            throw new IllegalArgumentException("Cliente no válido");
+            throw new IllegalArgumentException("Client not valid");
         }
 
-        // Guardar la reserva
+        // Save the booking
         booking.setWalkerUserId(walkerUserId);
         booking.setOwnerId(clientId);
+        if (booking.getStatus() == null) {
+            booking.setStatus(BookingStatus.PENDING);
+        }
         return bookingRepo.save(booking);
     }
 

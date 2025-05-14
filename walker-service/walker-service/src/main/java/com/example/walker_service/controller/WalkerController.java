@@ -121,7 +121,7 @@ public class WalkerController {
         return ResponseEntity.ok(nearbyWalkers);
     }
 
-    // ✅ Nuevo: Verificar si existe perfil de paseador
+    // verify if the walker profile exists for a given userId
     @GetMapping("/exists/{userId}")
     public ResponseEntity<Boolean> checkWalkerProfileExists(@PathVariable UUID userId) {
         boolean exists = walkerService.existsByUserId(userId);

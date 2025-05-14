@@ -63,7 +63,7 @@ public class WalkerService {
 
 
     public boolean existsByUserId(UUID userId) {
-        return walkerRepository.existsByUserId(userId);
+        return walkerRepository.existsByUserId(userId.toString());
     }
 
     public Walker getWalkerByUserId(String userId) {
