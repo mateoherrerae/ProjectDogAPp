@@ -153,4 +153,26 @@ public class UsersController {
     }
 
 
+    // endpoint to the ms of booking to obtain the lat and lng of the user, and then pass it to nearby(walker ms)
+    @GetMapping("/{userId}/location")
+    public ResponseEntity<GeoPoint> getUserLocation(@PathVariable UUID userId) {
+        Users user = usersService.findUserById(userId);
+
+        // Parse the address to extract lat and lng (mocked here)
+        if (user.getAddress() != null && !user.getAddress().isEmpty()) {
+            String[] addressParts = user.getAddress().split(","); // Assuming "lat,lng" format
+            if (addressParts.length == 2) {
+                try {
+                    double lat = Double.parseDouble(addressParts[0].trim());
+                    double lng = Double.parseDouble(addressParts[1].trim());
+                    return ResponseEntity.ok(new GeoPoint(lat, lng));
+                } catch (NumberFormatException e) {
+                    return ResponseEntity.badRequest().body(null);
+                }
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
 }

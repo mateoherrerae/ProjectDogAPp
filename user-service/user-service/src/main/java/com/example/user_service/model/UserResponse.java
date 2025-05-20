@@ -3,9 +3,7 @@ package com.example.user_service.model;
 import lombok.Getter;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Getter
 public class UserResponse {
@@ -13,6 +11,7 @@ public class UserResponse {
     private String username;
     private String email;        // Solo visible para dueño/admin
     private String phone;        // Solo visible para dueño/admin
+    private String address;      // Solo visible para dueño/admin
     private List<String> roles;  // Solo visible para dueño/admin
     private boolean isProfilePublic;
 
@@ -22,12 +21,11 @@ public class UserResponse {
         this.username = user.getUsername();
         this.email = isOwnerOrAdmin ? user.getEmail() : "🔒";
         this.phone = isOwnerOrAdmin ? user.getPhone() : "🔒";
+        this.address = isOwnerOrAdmin ? user.getAddress() : "🔒";
         this.roles = isOwnerOrAdmin
                 ? user.getRoles().stream().map(Role::getName).toList()
                 : List.of("🔒");
         this.isProfilePublic = user.isProfilePublic();
-
-        // Eliminado dogsCount hasta implementar Feign con el microservicio de dogs
     }
 
     // Constructor para mensajes de error

@@ -49,7 +49,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/username/*/id").authenticated()
                         .requestMatchers("/api/users/me").authenticated()
                         .requestMatchers("/api/walker/**").hasRole("WALKER")
@@ -58,8 +57,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/users/request-walker").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/users/validateWalker").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/location").authenticated()
+
 
                         .requestMatchers("/api/admin/grant-admin/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
