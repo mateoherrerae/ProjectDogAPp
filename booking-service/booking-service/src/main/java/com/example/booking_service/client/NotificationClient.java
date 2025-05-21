@@ -15,4 +15,7 @@ import com.example.booking_service.model.NotificationRequest;
 public interface NotificationClient {
     @PostMapping("/api/notifications/notify-walkers")
     ResponseEntity<Void> notifyWalkers(@RequestBody NotificationRequest request);
+
+    @PostMapping("/api/notifications/notify-walkers-async")
+    ResponseEntity<Void> notifyWalkersAsync(NotificationRequest notificationRequest);
 }

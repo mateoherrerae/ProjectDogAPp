@@ -62,7 +62,7 @@ public class BookingService {
     }
 
     // logic of reservation like uber
-    public OpenBooking createOpenBooking(UUID clientId, OpenBookingRequest request) {
+    public OpenBooking createOpenBooking(UUID clientId, OpenBookingRequest request, List<UUID> nearbyWalkerIds) {
         // Validate client
         ResponseEntity<String> clientValidationResponse = userServiceClient.getUsernameById(clientId);
         if (clientValidationResponse.getStatusCode() != HttpStatus.OK || clientValidationResponse.getBody() == null) {
@@ -82,29 +82,41 @@ public class BookingService {
         // Save the booking in the database
         openBookingRepo.save(openBooking);
 
-        // Extract lat and lng from location (assuming it's a comma-separated string "lat,lng")
-        String[] coordinates = request.getLocation().split(",");
-        double lat = Double.parseDouble(coordinates[0]);
-        double lng = Double.parseDouble(coordinates[1]);
-
-        // Find the nearest available walker
-        ResponseEntity<List<Walker>> response = walkerClient.getNearbyWalkers(lat, lng);
-        if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null || response.getBody().isEmpty()) {
-            throw new IllegalArgumentException("No nearby walkers found");
-        }
-        UUID nearestWalkerId = response.getBody().get(0).getId(); // Assuming the first walker is the nearest
-
-        // Notify the walker about the booking using NotificationClient
+        // Notify the walkers about the booking using NotificationClient
         NotificationRequest notificationRequest = new NotificationRequest();
-        List<String> walkerIds = new ArrayList<>();
-        walkerIds.add(nearestWalkerId.toString());
-        notificationRequest.setWalkerIds(walkerIds);
+        notificationRequest.setWalkerIds(nearbyWalkerIds.stream().map(UUID::toString).toList());
         notificationRequest.setBookingId(openBooking.getId().toString());
         notificationRequest.setMessage("You have a new booking request!");
 
         notificationClient.notifyWalkers(notificationRequest);
 
         return openBooking;
+    }
+
+    // get client location by UserID
+    public GeoPoint getClientLocation(UUID clientId, OpenBookingRequest request) {
+        // Check if the location is provided in the request
+        if (request.getLocation() != null) {
+            String[] coordinates = request.getLocation().split(",");
+            if (coordinates.length == 2) {
+                try {
+                    double lat = Double.parseDouble(coordinates[0].trim());
+                    double lng = Double.parseDouble(coordinates[1].trim());
+                    return new GeoPoint(lat, lng);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid location format. Expected 'lat,lng'.");
+                }
+            } else {
+                throw new IllegalArgumentException("Invalid location format. Expected 'lat,lng'.");
+            }
+        }
+        // Fetch the location from the user's profile via the endpoint in user ms
+        ResponseEntity<GeoPoint> locationResponse = userServiceClient.getUserLocation(clientId);
+        if (locationResponse.getStatusCode().is2xxSuccessful() && locationResponse.getBody() != null) {
+            return locationResponse.getBody();
+        }
+        // Return null if location cannot be determined
+        return null;
     }
 
 

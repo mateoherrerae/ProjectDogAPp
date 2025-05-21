@@ -24,4 +24,11 @@ public class NotificationController {
         notificationService.sendToWalkers(request);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/notify-walkers-async")
+    public ResponseEntity<Void> notifyWalkersAsync(@RequestBody NotificationRequest notificationRequest) {
+        // Lógica para enviar notificaciones a los paseadores de forma asíncrona
+        notificationService.sendToWalkersAsync(notificationRequest);
+        return ResponseEntity.ok().build();
+    }
 }

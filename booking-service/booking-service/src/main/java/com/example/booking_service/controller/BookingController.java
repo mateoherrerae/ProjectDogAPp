@@ -2,19 +2,18 @@ package com.example.booking_service.controller;
 
 import com.example.booking_service.client.DogServiceClient;
 import com.example.booking_service.client.UserServiceClient;
-import com.example.booking_service.model.Booking;
-import com.example.booking_service.model.DogResponse;
-import com.example.booking_service.model.OpenBooking;
-import com.example.booking_service.model.OpenBookingRequest;
+import com.example.booking_service.model.*;
 import com.example.booking_service.service.BookingService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import com.example.booking_service.client.WalkerClient;
 import com.example.booking_service.client.NotificationClient;
-import com.example.booking_service.model.NotificationRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
+import com.example.booking_service.model.GeoPoint;
+
 
 @RestController
 @RequestMapping("api/bookings")
@@ -57,7 +56,7 @@ public class BookingController {
 
         // Validate walker
         ResponseEntity<Boolean> walkerExistsResponse = walkerServiceClient.checkWalkerProfileExists(token, walkerUserId);
-        if (walkerExistsResponse.getStatusCode() != HttpStatus.OK || !walkerExistsResponse.getBody()) {
+        if (walkerExistsResponse.getStatusCode() != HttpStatus.OK || Boolean.FALSE.equals(walkerExistsResponse.getBody())) {
             // Return bad request if walker is invalid
             return ResponseEntity.badRequest().body(null);
         }
@@ -102,37 +101,51 @@ public class BookingController {
     @PostMapping("/open")
     public ResponseEntity<OpenBooking> createOpenBooking(
             @RequestHeader("Authorization") String token,
-            @RequestBody OpenBookingRequest request
+            @Valid @RequestBody OpenBookingRequest request
     ) {
-        // Validar la autenticación del usuario
+        // validate client
         String clientIdString = userServiceClient.getCurrentUserId(token);
         UUID clientId = UUID.fromString(clientIdString);
+        // Get client location (from request or profile)
+        GeoPoint location = bookingService.getClientLocation(clientId, request);
+        if (location == null) {
+            // Handle case where location is not available
+            return ResponseEntity.badRequest().body(null);
+        }
 
-        // Crear la publicación de un horario abierto
-        OpenBooking openBooking = bookingService.createOpenBooking(clientId, request);
+        // search walkers in a radius of 6km we can change this radius in FUTURE CREATE ENDPOINT TO CHANGE RADIUS
+        List<Walker> nearbyWalkers;
+        ResponseEntity<List<Walker>> response = walkerServiceClient.getNearbyWalkers(location.getLat(), location.getLng());
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            nearbyWalkers = response.getBody();
+        } else {
+            // handle case where no walkers are found or the response is invalid
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
 
-        // Convertir OpenBooking a NotificationRequest
-        NotificationRequest notificationRequest = mapToNotificationRequest(openBooking);
+        if (nearbyWalkers.isEmpty()) {
+            // handle case where no walkers are nearby
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
 
-        // Notificar a los paseadores
-        notificationClient.notifyWalkers(notificationRequest);
+        // 4. Crear open booking
+        OpenBooking openBooking = bookingService.createOpenBooking(
+                clientId,
+                request,
+                nearbyWalkers.stream().map(Walker::getId).toList()
+        );
+
+        // 5. Notificar walkers (asíncrono)
+        notificationClient.notifyWalkersAsync(
+                new NotificationRequest(
+                        nearbyWalkers,
+                        "Nueva reserva disponible en tu área!",
+                        openBooking.getExpiresAt()
+                )
+        );
 
         return ResponseEntity.ok(openBooking);
     }
-
-    private NotificationRequest mapToNotificationRequest(OpenBooking openBooking) {
-        NotificationRequest notificationRequest = new NotificationRequest();
-        notificationRequest.setWalkerIds(openBooking.getWalkerIds());
-        notificationRequest.setMessage("New open booking available!");
-        notificationRequest.setBookingId(openBooking.getId().toString());
-        notificationRequest.setExpiresAt(openBooking.getExpiresAt());
-        return notificationRequest;
-    }
-
-
-
-
-
 
 
 

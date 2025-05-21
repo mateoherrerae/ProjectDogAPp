@@ -1,7 +1,9 @@
-package com.example.user_service.model;
+package com.example.booking_service.model;
 
+import com.example.booking_service.client.UserServiceClient;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
 
@@ -16,4 +18,5 @@ public class GeoPoint {
         this.lat = lat;
         this.lng = lng;
     }
+
 }

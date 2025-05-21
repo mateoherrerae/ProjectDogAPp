@@ -1,5 +1,6 @@
 package com.example.booking_service.client;
 
+import com.example.booking_service.model.GeoPoint;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,5 +28,9 @@ public interface UserServiceClient {
 
     @GetMapping("/api/users/validateWalker")
     ResponseEntity<Boolean> validateWalker(@RequestHeader("Authorization") String token);
+
+    @GetMapping("/api/users/{userId}/location")
+    ResponseEntity<GeoPoint> getUserLocation(@PathVariable("userId") UUID userId);
+
 
 }
