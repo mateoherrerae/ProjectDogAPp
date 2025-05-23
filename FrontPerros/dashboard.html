@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+      <ul>
+        <li><a href="#" id="btnMisPerros">Mis Perros</a></li>
+        <li><a href="miPerfil.html" id="btnMiPerfil">Mi Perfil</a></li>
+        <li><a href="#" id="btnPaseador">Paseador</a></li>
+        <li><a href="#" id="btnReservar">Reservar Booking</a></li>
+        <li><a href="index.html" id="btnLogout">Cerrar Sesión</a></li>
+      </ul>
+    </nav>
+
+    <!-- Contenedor principal para mostrar contenido dinámico -->
+    <div id="mainContent" class="content">
+      <h1>Bienvenido al Dashboard</h1>
+      <p>Selecciona una opción en la barra de navegación para comenzar.</p>
+    </div>
+
+    <script>
+      document
+        .getElementById("btnMisPerros")
+        .addEventListener("click", async function () {
+          const token = localStorage.getItem("token"); // Recupera el Bearer Token del localStorage
+
+          if (!token) {
+            document.getElementById("mainContent").innerHTML = `
+            <div class="dogs-list">
+              <h2>Error</h2>
+              <p>No estás autenticado. Por favor, inicia sesión nuevamente.</p>
+            </div>
+          `;
+            return;
+          }
+
+          try {
+            const response = await fetch(
+              "http://localhost:8090/api/dogs/owner",
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${token}`, // Incluye el Bearer Token en el encabezado
+                },
+              }
+            );
+
+            if (response.ok) {
+              const dogs = await response.json(); // Obtiene la lista de perros
+              let dogsHtml = `
+              <div class="dogs-list">
+                <h2>Mis Perros</h2>
+                <ul>`;
+              if (dogs.length === 0) {
+                dogsHtml += "<p>No tienes perros registrados.</p>";
+              } else {
+                dogs.forEach((dog) => {
+                  dogsHtml += `
+                  <li id="dog-${dog.id}">
+                    <strong>Nombre:</strong> <span class="editable" data-key="name">${
+                      dog.name
+                    }</span><br>
+                    <strong>Raza:</strong> <span class="editable" data-key="breed">${
+                      dog.breed
+                    }</span><br>
+                    <strong>Edad:</strong> <span class="editable" data-key="age">${
+                      dog.age
+                    }</span> años<br>
+                    <strong>Peso:</strong> <span class="editable" data-key="weight">${
+                      dog.weight
+                    }</span> kg<br>
+                    <strong>Historial Médico:</strong> <span class="editable" data-key="medicalHistory">${
+                      dog.medicalHistory
+                    }</span><br>
+                    <strong>Cuidados Especiales:</strong> <span class="editable" data-key="specialCareInstructions">${
+                      dog.specialCareInstructions
+                    }</span><br>
+                    <strong>Perfil Público:</strong> <span class="editable" data-key="publicProfile">${
+                      dog.publicProfile ? "Sí" : "No"
+                    }</span><br>
+                    <button class="edit-btn" data-id="${dog.id}">Editar</button>
+                    <button class="save-btn" data-id="${
+                      dog.id
+                    }" style="display: none;">Guardar</button>
+                  </li><hr>`;
+                });
+              }
+              dogsHtml += `
+                </ul>
+              </div>
+              <div class="register-form">
+                <h2>Agregar Nuevo Perro</h2>
+                <form id="addDogForm">
+                  <label for="name">Nombre:</label>
+                  <input type="text" id="name" name="name" required /><br>
+
+                  <label for="breed">Raza:</label>
+                  <input type="text" id="breedInput" placeholder="Escribe para filtrar..." oninput="filterBreeds()" />
+                  <select id="breed" name="breed" size="5" required>
+                    <!-- Opciones de razas se llenarán dinámicamente -->
+                  </select><br>
+
+                  <label for="age">Edad:</label>
+                  <input type="number" id="age" name="age" required /><br>
+
+                  <label for="weight">Peso (kg):</label>
+                  <input type="number" step="0.1" id="weight" name="weight" required /><br>
+
+                  <label for="medicalHistory">Historial Médico:</label>
+                  <textarea id="medicalHistory" name="medicalHistory"></textarea><br>
+
+                  <label for="specialCareInstructions">Cuidados Especiales:</label>
+                  <textarea id="specialCareInstructions" name="specialCareInstructions"></textarea><br>
+
+                  <label for="isPublicProfile">Perfil Público:</label>
+                  <input type="checkbox" id="isPublicProfile" name="isPublicProfile" /><br>
+
+                  <button type="submit">Agregar Perro</button>
+                </form>
+              </div>`;
+
+              document.getElementById("mainContent").innerHTML = dogsHtml;
+
+              // Llenar la lista de razas
+              const breeds = [
+                "OTHER",
+                "RHODESIAN_RIDGEBACK",
+                "LABRADOR",
+                "GERMAN_SHEPHERD",
+                "GOLDEN_RETRIEVER",
+                "POODLE",
+                "BULLDOG",
+                "BEAGLE",
+                "ROTTWEILER",
+                "YORKSHIRE_TERRIER",
+                "BOXER",
+                "DACHSHUND",
+                "SIBERIAN_HUSKY",
+                "DOBERMAN",
+                "SHIH_TZU",
+                "GREAT_DANE",
+                "COCKER_SPANIEL",
+                "BORDER_COLLIE",
+                "AUSTRALIAN_SHEPHERD",
+                "CHIHUAHUA",
+                "MALTESE",
+                "PUG",
+                "SHIBA_INU",
+                "AKITA",
+                "BOSTON_TERRIER",
+                "SAINT_BERNARD",
+                "BICHON_FRISE",
+                "PIT_BULL",
+                "DALMATIAN",
+                "AFGHAN_HOUND",
+                "AMERICAN_BULLDOG",
+                "FRENCH_BULLDOG",
+                "BASENJI",
+                "BERNESE_MOUNTAIN_DOG",
+                "CHOW_CHOW",
+                "GREYHOUND",
+                "LHASA_APSO",
+                "POMERANIAN",
+                "SCHNAUZER",
+                "MIXED",
+              ];
+
+              const breedSelect = document.getElementById("breed");
+              breeds.forEach((breed) => {
+                const option = document.createElement("option");
+                option.value = breed;
+                option.textContent = breed;
+                breedSelect.appendChild(option);
+              });
+
+              // Manejo del formulario para agregar un perro
+              document
+                .getElementById("addDogForm")
+                .addEventListener("submit", async function (event) {
+                  event.preventDefault();
+
+                  const newDog = {
+                    name: document.getElementById("name").value,
+                    breed: document.getElementById("breed").value,
+                    age: parseInt(document.getElementById("age").value),
+                    weight: parseFloat(document.getElementById("weight").value),
+                    medicalHistory:
+                      document.getElementById("medicalHistory").value,
+                    specialCareInstructions: document.getElementById(
+                      "specialCareInstructions"
+                    ).value,
+                    isPublicProfile:
+                      document.getElementById("isPublicProfile").checked,
+                  };
+
+                  try {
+                    const response = await fetch(
+                      "http://localhost:8090/api/dogs/register",
+                      {
+                        method: "POST",
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(newDog),
+                      }
+                    );
+
+                    if (response.ok) {
+                      alert("Perro agregado exitosamente.");
+                      document.getElementById("btnMisPerros").click(); // Recargar la lista de perros
+                    } else {
+                      const errorText = await response.text();
+                      alert("Error al agregar el perro: " + errorText);
+                    }
+                  } catch (error) {
+                    console.error("Error al agregar el perro:", error);
+                    alert("Ocurrió un error al agregar el perro.");
+                  }
+                });
+
+              // Funcionalidad de edición
+              document.querySelectorAll(".edit-btn").forEach((button) => {
+                button.addEventListener("click", (event) => {
+                  const dogId = event.target.getAttribute("data-id");
+                  const dogElement = document.getElementById(`dog-${dogId}`);
+                  const saveButton = dogElement.querySelector(".save-btn");
+                  const editButton = dogElement.querySelector(".edit-btn");
+
+                  // Hacer los campos editables
+                  dogElement.querySelectorAll(".editable").forEach((span) => {
+                    const key = span.getAttribute("data-key");
+                    const value = span.textContent;
+
+                    if (key === "breed") {
+                      // Mostrar un select para la raza
+                      const select = document.createElement("select");
+                      select.setAttribute("data-key", key);
+
+                      breeds.forEach((breed) => {
+                        const option = document.createElement("option");
+                        option.value = breed;
+                        option.textContent = breed;
+                        if (breed === value) {
+                          option.selected = true;
+                        }
+                        select.appendChild(option);
+                      });
+
+                      span.innerHTML = "";
+                      span.appendChild(select);
+                    } else if (key === "publicProfile") {
+                      // Mostrar botones para Sí/No
+                      const yesButton = `<button data-key="${key}" data-value="true" class="boolean-btn ${
+                        value === "Sí" ? "active" : ""
+                      }">Sí</button>`;
+                      const noButton = `<button data-key="${key}" data-value="false" class="boolean-btn ${
+                        value === "No" ? "active" : ""
+                      }">No</button>`;
+                      span.innerHTML = `${yesButton} ${noButton}`;
+
+                      // Agregar eventos a los botones de visibilidad
+                      span.querySelectorAll(".boolean-btn").forEach((btn) => {
+                        btn.addEventListener("click", (e) => {
+                          span
+                            .querySelectorAll(".boolean-btn")
+                            .forEach((b) => b.classList.remove("active"));
+                          e.target.classList.add("active");
+                        });
+                      });
+                    } else {
+                      // Para otros campos, usar input de texto
+                      span.innerHTML = `<input type="text" value="${value}" data-key="${key}" />`;
+                    }
+                  });
+
+                  // Mostrar el botón "Guardar" y ocultar "Editar"
+                  saveButton.style.display = "inline-block";
+                  editButton.style.display = "none";
+                });
+              });
+
+              // Funcionalidad de guardar
+              document.querySelectorAll(".save-btn").forEach((button) => {
+                button.addEventListener("click", async (event) => {
+                  const dogId = event.target.getAttribute("data-id");
+                  const dogElement = document.getElementById(`dog-${dogId}`);
+                  const saveButton = dogElement.querySelector(".save-btn");
+                  const editButton = dogElement.querySelector(".edit-btn");
+
+                  // Recopilar los datos editados
+                  const updates = {};
+                  dogElement
+                    .querySelectorAll("input, select, button.boolean-btn")
+                    .forEach((input) => {
+                      const key = input.getAttribute("data-key");
+                      const value =
+                        input.tagName === "BUTTON"
+                          ? input.classList.contains("active") &&
+                            input.getAttribute("data-value") === "true"
+                          : input.value;
+                      updates[key] = value;
+                    });
+
+                  try {
+                    const response = await fetch(
+                      `http://localhost:8090/api/dogs/${dogId}`,
+                      {
+                        method: "PATCH",
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(updates),
+                      }
+                    );
+
+                    if (response.ok) {
+                      alert("Perro actualizado exitosamente.");
+                      document.getElementById("btnMisPerros").click(); // Recargar la lista de perros
+                    } else {
+                      const errorText = await response.text();
+                      alert("Error al actualizar el perro: " + errorText);
+                    }
+                  } catch (error) {
+                    console.error("Error al actualizar el perro:", error);
+                    alert("Ocurrió un error al actualizar el perro.");
+                  }
+
+                  // Restaurar el estado original
+                  saveButton.style.display = "none";
+                  editButton.style.display = "inline-block";
+                });
+              });
+            } else {
+              const errorText = await response.text();
+              console.error("Error del servidor:", errorText);
+              document.getElementById("mainContent").innerHTML = `
+              <div class="dogs-list">
+                <h2>Error</h2>
+                <p>No se pudieron cargar tus perros. Por favor, intenta nuevamente.</p>
+              </div>
+            `;
+            }
+          } catch (error) {
+            console.error("Error en la solicitud:", error);
+            document.getElementById("mainContent").innerHTML = `
+            <div class="dogs-list">
+              <h2>Error</h2>
+              <p>Ocurrió un problema al cargar tus perros. Por favor, intenta más tarde.</p>
+            </div>
+          `;
+          }
+        });
+
+      // Filtrar razas al escribir
+      function filterBreeds() {
+        const input = document.getElementById("breedInput").value.toLowerCase();
+        const options = document.getElementById("breed").options;
+        for (let i = 0; i < options.length; i++) {
+          const option = options[i];
+          option.style.display = option.value.toLowerCase().includes(input)
+            ? ""
+            : "none";
+        }
+      }
+    </script>
+  </body>
+</html>

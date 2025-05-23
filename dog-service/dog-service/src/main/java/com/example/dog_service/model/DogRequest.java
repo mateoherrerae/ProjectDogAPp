@@ -24,9 +24,9 @@ public class DogRequest {
 
     private String medicalHistory;
 
-    @JsonProperty("specialCareInstructions") // 🔴 Si el JSON usa camelCase
+    @JsonProperty("specialCareInstructions")
     private String specialCareInstructions;
 
-    @JsonProperty("isPublicProfile") // 🔴 Asegurar mapeo correcto
+    @JsonProperty("isPublicProfile")
     private boolean isPublicProfile;
 }

@@ -1,0 +1,91 @@
+<!-- filepath: c:\Escritorio\FrontPerros\index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="indexx.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1>Login</h1>
+      <form id="loginForm">
+        <div class="input-box">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Username"
+            required
+          />
+        </div>
+
+        <div class="input-box">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Password"
+            required
+          />
+        </div>
+
+        <div class="remember-forgot">
+          <label><input type="checkbox" name="remember" />Remember me</label>
+        </div>
+
+        <button type="submit">Login</button>
+      </form>
+
+      <button
+        onclick="window.location.href='register.html'"
+        style="margin-top: 20px"
+      >
+        Register
+      </button>
+
+      <div id="response" style="margin-top: 20px; color: red"></div>
+    </div>
+
+    <script>
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault(); // Evita el envío predeterminado del formulario
+
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          try {
+            const response = await fetch(
+              "http://localhost:8080/api/users/login",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password }),
+              }
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              localStorage.setItem("token", data.token); // Guarda el token en Local Storage
+              document.getElementById("response").textContent =
+                "Login successful!";
+              setTimeout(() => {
+                window.location.href = "dashboard.html"; // Redirige a otra página
+              }, 2000);
+            } else {
+              document.getElementById("response").textContent =
+                "Login failed. Please try again.";
+            }
+          } catch (error) {
+            document.getElementById("response").textContent =
+              "An error occurred. Please try again later.";
+          }
+        });
+    </script>
+  </body>
+</html>

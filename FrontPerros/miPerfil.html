@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi Perfil</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+      <ul>
+        <li><a href="dashboard.html" id="btnMisPerros">Mis Perros</a></li>
+        <li><a href="miPerfil.html" id="btnMiPerfil">Mi Perfil</a></li>
+        <li><a href="#" id="btnPaseador">Paseador</a></li>
+        <li><a href="#" id="btnReservar">Reservar Booking</a></li>
+        <li><a href="index.html" id="btnLogout">Cerrar Sesión</a></li>
+      </ul>
+    </nav>
+
+    <!-- Contenedor principal -->
+    <div id="mainContent" class="content">
+      <h1>Mi Perfil</h1>
+      <div id="profileDetails" class="profile-section">
+        <p>Cargando información del perfil...</p>
+      </div>
+    </div>
+
+    <script>
+      // Función para cargar los detalles del perfil
+      async function loadProfile() {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          document.getElementById("profileDetails").innerHTML = `
+            <p>Error: No estás autenticado. Por favor, inicia sesión nuevamente.</p>
+          `;
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            "http://localhost:8080/api/users/me/details",
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (response.ok) {
+            const userDetails = await response.json();
+            document.getElementById("profileDetails").innerHTML = `
+              <ul>
+                <li id="username-field">
+                  <strong>Nombre de Usuario:</strong>
+                  <span class="editable" data-key="username">${
+                    userDetails.username
+                  }</span>
+                  <button class="edit-btn" data-key="username">Editar</button>
+                  <button class="save-btn" data-key="username" style="display: none;">Guardar</button>
+                </li>
+                <li id="email-field">
+                  <strong>Email:</strong>
+                  <span class="editable" data-key="email">${
+                    userDetails.email
+                  }</span>
+                  <button class="edit-btn" data-key="email">Editar</button>
+                  <button class="save-btn" data-key="email" style="display: none;">Guardar</button>
+                </li>
+                <li id="phone-field">
+                  <strong>Teléfono:</strong>
+                  <span class="editable" data-key="phone">${
+                    userDetails.phone
+                  }</span>
+                  <button class="edit-btn" data-key="phone">Editar</button>
+                  <button class="save-btn" data-key="phone" style="display: none;">Guardar</button>
+                </li>
+                <li id="address-field">
+                  <strong>Dirección:</strong>
+                  <span class="editable" data-key="address">${
+                    userDetails.address
+                  }</span>
+                  <button class="edit-btn" data-key="address">Editar</button>
+                  <button class="save-btn" data-key="address" style="display: none;">Guardar</button>
+                </li>
+                <li>
+                  <strong>Roles:</strong>
+                  ${userDetails.roles
+                    .map((role) => `<span class="role">${role.name}</span>`)
+                    .join("")}
+                </li>
+                <li>
+                  <strong>Perfil Público:</strong>
+                  <div class="visibility-toggle">
+                    <button class="visibility-btn ${
+                      userDetails.profilePublic ? "active" : ""
+                    }" data-value="true">Sí</button>
+                    <button class="visibility-btn ${
+                      !userDetails.profilePublic ? "active" : ""
+                    }" data-value="false">No</button>
+                  </div>
+                </li>
+              </ul>
+            `;
+
+            // Agregar eventos a los botones de visibilidad
+            document.querySelectorAll(".visibility-btn").forEach((button) => {
+              button.addEventListener("click", async (event) => {
+                const isPublic =
+                  event.target.getAttribute("data-value") === "true";
+                await updateProfileVisibility(isPublic);
+              });
+            });
+
+            // Agregar eventos a los botones de edición
+            document.querySelectorAll(".edit-btn").forEach((button) => {
+              button.addEventListener("click", (event) => {
+                const key = event.target.getAttribute("data-key");
+                const field = document.getElementById(`${key}-field`);
+                const span = field.querySelector(".editable");
+                const saveButton = field.querySelector(".save-btn");
+                const editButton = field.querySelector(".edit-btn");
+
+                // Convertir el texto en un input editable
+                const value = span.textContent;
+                span.innerHTML = `<input type="text" value="${value}" />`;
+
+                // Mostrar el botón "Guardar" y ocultar "Editar"
+                saveButton.style.display = "inline-block";
+                editButton.style.display = "none";
+              });
+            });
+
+            // Agregar eventos a los botones de guardar
+            document.querySelectorAll(".save-btn").forEach((button) => {
+              button.addEventListener("click", async (event) => {
+                const key = event.target.getAttribute("data-key");
+                const field = document.getElementById(`${key}-field`);
+                const span = field.querySelector(".editable");
+                const input = span.querySelector("input");
+                const saveButton = field.querySelector(".save-btn");
+                const editButton = field.querySelector(".edit-btn");
+
+                // Obtener el nuevo valor
+                const newValue = input.value;
+
+                // Actualizar el perfil en el backend
+                await updateProfileField(key, newValue);
+
+                // Restaurar el texto y los botones
+                span.textContent = newValue;
+                saveButton.style.display = "none";
+                editButton.style.display = "inline-block";
+              });
+            });
+          } else {
+            document.getElementById("profileDetails").innerHTML = `
+              <p>Error al cargar el perfil. Por favor, intenta nuevamente.</p>
+            `;
+          }
+        } catch (error) {
+          document.getElementById("profileDetails").innerHTML = `
+            <p>Ocurrió un problema al cargar el perfil. Por favor, intenta más tarde.</p>
+          `;
+        }
+      }
+
+      // Función para actualizar un campo del perfil
+      // Función para actualizar un campo del perfil
+      async function updateProfileField(key, value) {
+        const token = localStorage.getItem("token");
+
+        try {
+          const response = await fetch(
+            "http://localhost:8080/api/users/me/profile",
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ [key]: value }),
+            }
+          );
+
+          if (!response.ok) {
+            const errorResponse = await response.json(); // Parsear la respuesta de error
+            if (errorResponse.error) {
+              alert("Error al actualizar el perfil: " + errorResponse.error); // Mostrar el mensaje de error del backend
+            } else {
+              alert(
+                "Error al actualizar el perfil. Por favor, intenta nuevamente."
+              );
+            }
+          }
+        } catch (error) {
+          alert("Ocurrió un error al actualizar el perfil.");
+        }
+      }
+
+      // Función para cambiar la visibilidad del perfil
+      async function updateProfileVisibility(isPublic) {
+        const token = localStorage.getItem("token");
+
+        try {
+          const response = await fetch(
+            "http://localhost:8080/api/users/me/visibility",
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ isPublic }),
+            }
+          );
+
+          if (response.ok) {
+            alert("Visibilidad del perfil actualizada exitosamente.");
+            loadProfile(); // Recargar los detalles del perfil
+          } else {
+            const errorText = await response.text();
+            alert("Error al actualizar la visibilidad: " + errorText);
+          }
+        } catch (error) {
+          alert("Ocurrió un error al actualizar la visibilidad del perfil.");
+        }
+      }
+
+      // Cargar el perfil al cargar la página
+      loadProfile();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,130 @@
+/* General */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('rhodesian27.jpg'); /* Imagen de fondo */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+  }
+  
+  .wrapper {
+    background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra suave */
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  /* Input Fields */
+  .input-box {
+    margin-bottom: 20px;
+  }
+  
+  .input-box input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  .input-box input:focus {
+    border-color: #ff914d;
+  }
+  
+  /* Remember Me and Forgot Password */
+  .remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+  
+  .remember-forgot label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .remember-forgot a {
+    color: #ff4d4d;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .remember-forgot a:hover {
+    color: #ff914d;
+  }
+  
+  /* Buttons */
+  button {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #ff914d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  button:hover {
+    background-color: #ff4d4d;
+    transform: scale(1.05);
+  }
+  
+  button:active {
+    transform: scale(0.95);
+  }
+  
+  button[onclick] {
+    background-color: #4d79ff;
+    margin-top: 10px;
+  }
+  
+  button[onclick]:hover {
+    background-color: #3355cc;
+  }
+  
+  /* Response Message */
+  #response {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: red;
+    margin-top: 10px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .wrapper {
+      padding: 20px;
+    }
+  
+    h1 {
+      font-size: 1.8rem;
+    }
+  
+    button {
+      font-size: 0.9rem;
+    }
+  }

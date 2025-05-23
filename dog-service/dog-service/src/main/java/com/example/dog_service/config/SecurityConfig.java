@@ -35,10 +35,12 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // ✅ API sin estado
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // ✅ Permitir solicitudes OPTIONS
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll() // ✅ Swagger público
                         .requestMatchers(HttpMethod.GET, "/api/dogs/public/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/dogs/**").permitAll() // ✅ Permite GET públicos
+                        .requestMatchers(HttpMethod.GET, "/api/dogs/**").authenticated() // ✅ Requiere autenticación para GET
                         .requestMatchers(HttpMethod.POST, "/api/dogs/register").hasRole("OWNER") // ⚠️ Requiere ajuste
+                        .requestMatchers(HttpMethod.PATCH, "/api/dogs/**").hasAnyRole("OWNER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -49,9 +51,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+
+        // Permitir orígenes específicos
+        config.setAllowedOrigins(List.of("http://127.0.0.1:5500", "http://localhost:3000")); // Agrega todos los orígenes necesarios
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // Incluye PATCH y OPTIONS
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Permite encabezados personalizados
+        config.setExposedHeaders(List.of("Authorization")); // Exponer encabezados si es necesario
+        config.setAllowCredentials(true); // Permitir credenciales
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

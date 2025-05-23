@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1>Register</h1>
+      <form id="registerForm">
+        <div class="input-box">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Username"
+            required
+          />
+        </div>
+
+        <div class="input-box">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Email"
+            required
+          />
+        </div>
+
+        <div class="input-box">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Password"
+            required
+          />
+        </div>
+
+        <div class="input-box">
+          <input
+            type="text"
+            id="address"
+            name="address"
+            placeholder="Address"
+            required
+          />
+        </div>
+
+        <div class="input-box">
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            placeholder="Phone"
+            required
+          />
+        </div>
+
+        <button type="submit">Register</button>
+      </form>
+
+      <!-- Botón para volver a la pantalla de inicio de sesión -->
+      <button
+        onclick="window.location.href='index.html'"
+        style="margin-top: 20px"
+      >
+        Back to Login
+      </button>
+
+      <div id="response" style="margin-top: 20px; color: red"></div>
+    </div>
+
+    <script>
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault(); // Evita el envío predeterminado del formulario
+
+          const username = document.getElementById("username").value;
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          const address = document.getElementById("address").value;
+          const phone = document.getElementById("phone").value;
+
+          try {
+            const response = await fetch(
+              "http://localhost:8080/api/users/register",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  username,
+                  email,
+                  password,
+                  address,
+                  phone,
+                }),
+              }
+            );
+
+            if (response.ok) {
+              document.getElementById("response").textContent =
+                "Registration successful!";
+              setTimeout(() => {
+                window.location.href = "index.html"; // Redirige a la pantalla de inicio de sesión
+              }, 3000); // Redirige después de 3 segundos
+            } else {
+              const errorMessage = await response.text(); // Leer el mensaje del backend
+              document.getElementById("response").textContent =
+                errorMessage || "Registration failed. Please try again.";
+            }
+          } catch (error) {
+            document.getElementById("response").textContent =
+              "An error occurred. Please try again later.";
+          }
+        });
+    </script>
+  </body>
+</html>

@@ -7,8 +7,9 @@ import com.example.dog_service.model.DogRequest;
 import com.example.dog_service.model.DogResponse;
 import com.example.dog_service.repo.DogRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import java.util.Map;
 import org.springframework.stereotype.Service;
+import com.example.dog_service.model.DogBreed;
 
 import java.util.List;
 import java.util.UUID;
@@ -108,4 +109,55 @@ public class DogService {
         return dogRepository.findById(dogId)
                 .orElseThrow(() -> new DogNotFoundException(dogId));
     }
+
+    public DogResponse updateDog(UUID dogId, Map<String, Object> updates, UUID ownerId) {
+        Dog dog = findDogById(dogId);
+
+        if (!dog.getOwnerId().equals(ownerId)) {
+            throw new DogNotFoundException(dogId);
+        }
+
+        updates.forEach((key, value) -> {
+            switch (key) {
+                case "name":
+                    dog.setName((String) value);
+                    break;
+                case "age":
+                    dog.setAge(Integer.parseInt(value.toString())); // Convert to Integer
+                    break;
+                case "weight":
+                    dog.setWeight(Double.parseDouble(value.toString())); // Convert to Double
+                    break;
+                case "breed":
+                    try {
+                        dog.setBreed(DogBreed.valueOf(value.toString())); // Convert to DogBreed enum
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Invalid breed: " + value);
+                    }
+                    break;
+                case "medicalHistory":
+                    dog.setMedicalHistory((String) value); // Handle medicalHistory
+                    break;
+                case "specialCareInstructions":
+                    dog.setSpecialCareInstructions((String) value); // Handle specialCareInstructions
+                    break;
+                case "publicProfile":
+                    if (value != null) {
+                        boolean isPublic = Boolean.parseBoolean(value.toString());
+                        dog.setPublicProfile(isPublic);
+                        System.out.println("Updated publicProfile to: " + isPublic);
+                    } else {
+                        throw new IllegalArgumentException("publicProfile cannot be null.");
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid field: " + key);
+            }
+        });
+
+        Dog updatedDog = dogRepository.save(dog);
+        return convertToDogResponse(updatedDog);
+    }
+
+
 }

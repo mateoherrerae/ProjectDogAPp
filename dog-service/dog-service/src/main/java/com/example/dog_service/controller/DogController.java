@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -72,6 +73,24 @@ public class DogController {
         UUID ownerId = UUID.fromString(response.getBody());
         return ResponseEntity.ok(dogService.getDogsByOwner(ownerId));
     }
+
+    // update the dog
+    @PatchMapping("/{dogId}")
+    @PreAuthorize("hasRole('OWNER') or hasRole('ADMIN')")
+    public ResponseEntity<DogResponse> updateDog(
+            @PathVariable UUID dogId,
+            @RequestBody Map<String, Object> updates,
+            @RequestHeader("Authorization") String token) {
+        ResponseEntity<String> response = userServiceClient.getCurrentUserId(token);
+        if (response.getStatusCode() != HttpStatus.OK) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        UUID ownerId = UUID.fromString(response.getBody());
+        DogResponse updatedDog = dogService.updateDog(dogId, updates, ownerId);
+        return ResponseEntity.ok(updatedDog);
+    }
+
+
 
 
 }
