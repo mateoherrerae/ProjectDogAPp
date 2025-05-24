@@ -34,7 +34,7 @@ Inspired by various innovative concepts, I have outlined several ideas and featu
 
 ### 1. Core Features (MVP)
 
-#### Dog Walkers
+#### Dog Walkers 
 - **Registration & Verification**: Walkers register with identity verification through photos, documents, and references.
 - **Rating & Review System**: Users can filter walkers based on scores, experience, and more.
 - **Real-Time Geolocation**: Dog owners can track the walker's route in real time (integrating APIs like Google Maps).
@@ -127,8 +127,6 @@ Inspired by various innovative concepts, I have outlined several ideas and featu
 
 ---
 
-## Conclusion
 
-This project creates an ecosystem that brings together all aspects of dog care under one roof—combining innovative ideas with a solid technical foundation. My journey has been one of learning and growth, aimed at making pet care smarter, safer, and more interconnected.
 
-Thank you for taking the time to explore my Dog Caregivers Application Project. I welcome any feedback or suggestions you might have!
+Thank you for taking the time to explore my project. I welcome any feedback or suggestions you might have!
